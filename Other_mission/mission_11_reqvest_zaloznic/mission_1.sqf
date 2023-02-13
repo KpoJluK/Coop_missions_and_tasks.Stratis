@@ -64,7 +64,7 @@ _unit_1 disableAI "Path";
 _unit_1 setSkill 1;
 
 
-private _group_zaloznic = createGroup [west, true];
+private _group_zaloznic = createGroup [civilian, true];
 private _unit_1_zaloznic = _group_zaloznic createUnit [selectRandom _class_name_zaloznik, _bilding_from_mission_general select 1, [], 0, "FORM"];
 [_unit_1_zaloznic, true] call ACE_captives_fnc_setHandcuffed;
 
