@@ -164,9 +164,18 @@ list_roads_all_map = center_map nearRoads radius_map;
 	sleep 10;
 	// chek admin or server
 
-	[[], {if((call BIS_fnc_admin) > 0)then{select_client_admin = clientOwner;};}] remoteExec ["call", 0];
+	[[], {if((call BIS_fnc_admin) > 0)then{select_client_admin = clientOwner; publicVariable "select_client_admin"};}] remoteExec ["call", 0];
+
+	[]spawn{
+		waitUntil{
+			[[], {hintSilent "Ожидание пока появится администртор"}] remoteExec ["call", 0];
+			sleep 20;
+			if!(isMultiplayer)exitWith{true};
+			!isNil "select_client_admin"
+		};
+	};
+
 	waitUntil{
-		[[], {hintSilent "Ожидание пока появится администртор"}] remoteExec ["call", 0];
 		if!(isMultiplayer)exitWith{true};
 		!isNil "select_client_admin"
 	};
@@ -195,7 +204,7 @@ list_roads_all_map = center_map nearRoads radius_map;
 			0,													// Priority
 			false,												// Remove on completion
 			false												// Show in unconscious state
-		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 	} forEach West_side;
 
@@ -221,7 +230,7 @@ list_roads_all_map = center_map nearRoads radius_map;
 			0,													// Priority
 			false,												// Remove on completion
 			false												// Show in unconscious state
-		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 	} forEach East_side;
 
@@ -247,14 +256,14 @@ list_roads_all_map = center_map nearRoads radius_map;
 			0,													// Priority
 			false,												// Remove on completion
 			false												// Show in unconscious state
-		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 	} forEach Independent_side;
 
 
 	[]spawn{
 		waitUntil{
-		hint"Администратор, Выберите фракцию за которую будете играть";
+		"Администратор, Выберите фракцию за которую будете играть"remoteExec ["hint", 0];
 		sleep 20;
 		!isNil{player_faction}
 		};
@@ -275,7 +284,7 @@ list_roads_all_map = center_map nearRoads radius_map;
 	Baner_1 setObjectTextureGlobal [0, player_faction select 2];
 	Flag_1 setFlagTexture (player_faction select 2);
 
-	hint"";
+	""remoteExec ["hint", 0];
 
 ////////////////////////////// -------------------------- add frendly class names --------------------------------/////////////////////////////////////////////////
 
@@ -428,7 +437,7 @@ list_roads_all_map = center_map nearRoads radius_map;
 	// add action
 
 waitUntil{
-	if(!(side (selectRandom allPlayers) isEqualTo west))then{
+	if!(player_side isEqualTo west)then{
 		{
 
 			[
@@ -449,14 +458,14 @@ waitUntil{
 				0,													// Priority
 				false,												// Remove on completion
 				false												// Show in unconscious state
-			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 		} forEach West_side;
 	};
 
 	sleep 0.1;
 
-	if(!(side (selectRandom allPlayers) isEqualTo EAST))then{
+	if!(player_side isEqualTo EAST)then{
 		{
 
 			[
@@ -477,12 +486,12 @@ waitUntil{
 				0,													// Priority
 				false,												// Remove on completion
 				false												// Show in unconscious state
-			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 		} forEach East_side;
 	};
 
-	if(!(side (selectRandom allPlayers) isEqualTo independent))then{
+	if!(player_side isEqualTo independent)then{
 		{
 
 			[
@@ -503,7 +512,7 @@ waitUntil{
 				0,													// Priority
 				false,												// Remove on completion
 				false												// Show in unconscious state
-			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 		} forEach Independent_side;
 	};
@@ -511,7 +520,7 @@ waitUntil{
 
 	[]spawn{
 		waitUntil{
-		hint"Администратор, Выберите фракцию противника";
+		"Администратор, Выберите фракцию противника"remoteExec ["hint", 0];
 		sleep 20;
 		!isNil{enemy_fraction}
 		};
@@ -692,14 +701,14 @@ waitUntil{
 				0,													// Priority
 				false,												// Remove on completion
 				false												// Show in unconscious state
-			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 		} forEach Civilian_side;
 	};
 
 	[]spawn{
 		waitUntil{
-		hint"Администратор, Выберите фракцию гражданских";
+		"Администратор, Выберите фракцию гражданских"remoteExec ["hint", 0];
 		sleep 20;
 		!isNil{Civilian_faction}
 		};
@@ -811,7 +820,7 @@ if((hevy_enemy_vehicle_arry select 0) isNotEqualTo "<NULL-object>")then{
 		0,													// Priority
 		false,												// Remove on completion
 		false												// Show in unconscious state
-	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 };
 
 	if((heli_enemy_vehecle_arry select 0) isNotEqualTo "<NULL-object>")then{
@@ -844,7 +853,7 @@ if((hevy_enemy_vehicle_arry select 0) isNotEqualTo "<NULL-object>")then{
 			0,													// Priority
 			false,												// Remove on completion
 			false												// Show in unconscious state
-		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 	};
 
@@ -882,7 +891,7 @@ if((hevy_enemy_vehicle_arry select 0) isNotEqualTo "<NULL-object>")then{
 			0,													// Priority
 			false,												// Remove on completion
 			false												// Show in unconscious state
-		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 
 	};
@@ -922,7 +931,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 
 [
@@ -953,7 +962,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 if((heli_frendly_vehecle_arry select 0) isNotEqualTo "<NULL-object>")then{
 	[
@@ -983,7 +992,7 @@ if((heli_frendly_vehecle_arry select 0) isNotEqualTo "<NULL-object>")then{
 		0,													// Priority
 		false,												// Remove on completion
 		false												// Show in unconscious state
-	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 };
 
 [
@@ -1013,7 +1022,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 [
 Noyt_1,											// Object the action is attached to
@@ -1048,7 +1057,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 [
 Noyt_1,											// Object the action is attached to
@@ -1076,7 +1085,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 	
 [
 Noyt_1,											// Object the action is attached to
@@ -1105,7 +1114,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 [
 Noyt_1,											// Object the action is attached to
@@ -1140,7 +1149,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 
 [
@@ -1176,7 +1185,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 
 [
@@ -1215,7 +1224,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 [
 Noyt_1,											// Object the action is attached to
@@ -1247,7 +1256,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 
 [
@@ -1282,7 +1291,7 @@ Noyt_1,											// Object the action is attached to
 	0,													// Priority
 	false,												// Remove on completion
 	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 
 _non_redy_car_from_mission_16 = "(getText (_x >> 'faction') == (enemy_fraction select 0)) and ((configName _x isKindOf ""Car"" or configName _x isKindOf ""Truck"") and getNumber (_x >> 'transportSoldier') >= 5)" configClasses (configFile >> "CfgVehicles");
@@ -1333,5 +1342,5 @@ if(car_from_mission_16 isNotEqualTo [])then{
 		0,													// Priority
 		false,												// Remove on completion
 		false												// Show in unconscious state
-	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin, Noyt_1];	// MP compatible implementation
+	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 };
