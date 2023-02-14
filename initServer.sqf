@@ -272,14 +272,6 @@ list_roads_all_map = center_map nearRoads radius_map;
 		!isNil{player_faction}
 	};
 
-	// join player to select side
-
-	player_Group = createGroup [player_side, false];
-	publicVariable "player_Group";
-	{
-		[_x] joinSilent player_Group;
-	} forEach allPlayers;
-
 	// add flag player faction
 	Baner_1 setObjectTextureGlobal [0, player_faction select 2];
 	Flag_1 setFlagTexture (player_faction select 2);
@@ -420,8 +412,8 @@ list_roads_all_map = center_map nearRoads radius_map;
 		plane_vehecle_arry append [str objNull];
 	};
 
-	// add player to choise faction
-	player_Group = createGroup [player_side, true];
+	// add player to choise side
+	player_Group = createGroup [player_side, false];
 	publicVariable "player_Group";
 	{
 		[_x] joinSilent player_Group;

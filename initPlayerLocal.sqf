@@ -83,7 +83,6 @@ removeHeadgear player;
 removeGoggles player;
 player addUniform _uniform_select_faction;
 
-[player] joinSilent player_Group;
 
 
 // оружие заспину 
