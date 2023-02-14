@@ -1,54 +1,39 @@
-pos = [0,0,0];
 
-spec_rabbit_support_mapWasOpened = visibleMap; 
-spec_rabbit_support_mapClicked = false; 
- 
-openMap [true,false]; 
-titleText ["Select Position","PLAIN",0.5]; 
- 
-["spec_rabbit_support_selectPosition","onMapSingleClick",{ 
-    params ["_units","_position","_alt","_shift","_player","_entity","_request"]; 
- 
-    ["spec_rabbit_support_selectPosition","onMapSingleClick"] call BIS_fnc_removeStackedEventHandler; 
- 
-    spec_rabbit_support_mapClicked = true; 
-    titleFadeOut 0.5; 
-    if (!spec_rabbit_support_mapWasOpened) then { 
-        openMap [false,false]; 
-  
-    }; 
- 
-pos = _position;
- // [_player,_position] execVM "some_script.sqf"; - вызов скрипта с параметрами 
-}, 
-[player,"onEachFrame"]] call BIS_fnc_addStackedEventHandler; 
- 
- 
-waitUntil{(!visibleMap || spec_rabbit_support_mapClicked)}; 
- 
-if (!spec_rabbit_support_mapClicked) then { 
-        ["spec_rabbit_support_selectPosition","onMapSingleClick"] call BIS_fnc_removeStackedEventHandler; 
- 
-        titleFadeOut 0.5; 
-        titleText ["Cancelled","PLAIN",0.5]; 
-        sleep 1;
-        titleFadeOut 0.5;
-		if(true)exitWith {};
-    };
+if(isNil"Call_drop_bomb_ypr")then{Call_drop_bomb_ypr = false; publicVariable "Call_drop_bomb_ypr"};
+if(Call_drop_bomb_ypr)exitWith{hint "Самолет еще не перезарядил бомбы"};
+Call_drop_bomb_ypr = true;
+publicVariable "Call_drop_bomb_ypr";
 
+target_fom_bomb_ypravlaema = "Land_HelipadEmpty_F" createVehicle [0,0,0];
+pos_fom_bomb_ypravlaema = [0,0,0];
+openMap [true, false];
+onMapSingleClick { pos_fom_bomb_ypravlaema = _pos };
 waitUntil{
-    pos isNotEqualTo [0,0,0]
+	!(visibleMap) or (pos_fom_bomb_ypravlaema IsNotEqualTo [0,0,0])
 };
-
-_target = "Land_HelipadEmpty_F" createVehicle pos;
-
-
+if(pos_fom_bomb_ypravlaema IsEqualTo [0,0,0])exitWith{
+	deleteVehicle target_fom_bomb_ypravlaema; 
+	pos_fom_bomb_ypravlaema = nil;
+	Call_drop_bomb_ypr = false;
+	publicVariable "Call_drop_bomb_ypr";
+	[]spawn{
+	    titleFadeOut 0.5; 
+        titleText ["Отмена вызова сброса бомбы","PLAIN",0.5]; 
+        titleFadeOut 0.5;
+	}
+};
+openMap [false, false];
+hint "Координаты указаны, самолет вылетел";
+sleep 3;
+hint "";
+target_fom_bomb_ypravlaema setPos pos_fom_bomb_ypravlaema;
 // скрипт сброса бомбы
 // класс нейм самолета
 // сторона самолата
 // класс найм бомбы
+// цель
 // 500 - за сколько метров сброс бомбы
-["B_Plane_CAS_01_dynamicLoadout_F",WEST,"Bo_GBU12_LGB",_target,500] spawn {
+["B_Plane_CAS_01_dynamicLoadout_F",WEST,"Bo_Mk82",target_fom_bomb_ypravlaema,500] spawn {
 	params["_class_name_plane","_side_plane","_class_name_rocet","_target","_distanse_fire"];
 	// функция наводки
 
@@ -88,6 +73,7 @@ _target = "Land_HelipadEmpty_F" createVehicle pos;
 	_Position_target = getPos _target;
 	//спуним самолет
 	_C_130 = [player modelToWorld [500 + random 2000, 500 + random 2000, 1500], 180, _class_name_plane, _side_plane] call BIS_fnc_spawnVehicle;
+	_C_130 select 2 setCombatMode "BLUE";
 	_C_130 select 0 setVehicleAmmo 0;
 	{_x setSkill ["courage", 1]} forEach units (_C_130 select 2);
 	_vector = (getPos (_C_130 select 0)) vectorFromTo (getPos _target);  
@@ -97,8 +83,8 @@ _target = "Land_HelipadEmpty_F" createVehicle pos;
 	_wp_C_130 setWaypointType "MOVE";
 	_wp_C_130 setWaypointSpeed "FULL";
 	[(_C_130 select 2), 0] setWaypointCombatMode "BLUE";
-	(_C_130 select 0) flyInHeight 1000;
 
+	(_C_130 select 0) flyInHeight 1000;
 	// таймер если самолет будет тупить над целью
 	[(_C_130 select 0)]spawn{
 		params["_plane"];
@@ -108,15 +94,17 @@ _target = "Land_HelipadEmpty_F" createVehicle pos;
 		};
 		deleteVehicle _plane;
 	};
-	
 	// жду пока самолет будет над точкой
 	waitUntil{
 		sleep 1;
 		((getPos (_C_130 select 0)) inArea [_Position_target, _distanse_fire, _distanse_fire, 0, false]) or !alive (_C_130 select 0)
 	};
 	if(!alive (_C_130 select 0))exitWith{}; // если самолет сбит завершение скрипта
-
-	_missile = createVehicle [_class_name_rocet,getPos (_C_130 select 0),[],0,"CAN_COLLIDE"]; 
+	_pos_from_missle = getPos (_C_130 select 0);
+	_missile = createVehicle [_class_name_rocet,getPosATL (_C_130 select 0),[],0,"CAN_COLLIDE"]; 
+	
+	// навожу бомбу 
+	[_missile,_target] spawn Dr_fnc_launchObj;
 
 	// перемещаю цель на лазерную отметку
 	[_target, _missile]spawn{
@@ -132,8 +120,8 @@ _target = "Land_HelipadEmpty_F" createVehicle pos;
 		};
 	};
 
-	[_missile,_target] spawn Dr_fnc_launchObj;
 
+	// жду пока бомба будет возле цели
 	waitUntil{
 		(getPos _missile) inArea [getPos _target, 1, 1, 1, false]
 	};
@@ -146,10 +134,14 @@ _target = "Land_HelipadEmpty_F" createVehicle pos;
     _time = time;
 	waitUntil{
 		sleep 5;
-		time > (_time + 30)
+		time > (_time + 15)
 	};
 	{(_C_130 select 0) deleteVehicleCrew _x } forEach (_C_130 select 1);
 	deleteVehicle (_C_130 select 0);
+	pos_fom_bomb_ypravlaema = nil;
+	deleteVehicle target_fom_bomb_ypravlaema;
+	sleep 300;
+	Call_drop_bomb_ypr = false;
+	publicVariable "Call_drop_bomb_ypr";
 };
 
-pos = [0,0,0];
