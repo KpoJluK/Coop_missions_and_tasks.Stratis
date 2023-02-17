@@ -21,21 +21,22 @@ waitUntil {!isNull (finddisplay 46)};
 // lodaut in death
 
 player addEventHandler [
-	"Killed",
-	{
-		[player, [missionNamespace, "Inventory_on_death"]] call BIS_fnc_saveInventory;
-		true
-	}
+    "Killed",
+    {
+["Initialize", [player, [], true]] call BIS_fnc_EGSpectator;
+        [player, [missionNamespace, "Inventory_on_death"]] call BIS_fnc_saveInventory;
+        true
+    }
 ];
 
 player addEventHandler [
-	"Respawn",
-	{
-		player setPos(getPos Flag_1);
-		[player] joinSilent player_Group;
-		if(isNil {missionNamespace getVariable "player_saves_Inventory"})then{[player, [missionNamespace, "Inventory_on_death"]] call BIS_fnc_loadInventory;}else{[player, [missionNamespace, "player_saves_Inventory"]] call BIS_fnc_loadInventory;};
-		true
-	}
+    "Respawn",
+    {["Terminate"] call BIS_fnc_EGSpectator;
+        player setPos(getPos Flag_1);
+        [player] joinSilent player_Group;
+        if(isNil {missionNamespace getVariable "player_saves_Inventory"})then{[player, [missionNamespace, "Inventory_on_death"]] call BIS_fnc_loadInventory;}else{[player, [missionNamespace, "player_saves_Inventory"]] call BIS_fnc_loadInventory;};
+        true
+    }
 ];
 
 

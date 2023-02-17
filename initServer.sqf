@@ -164,7 +164,7 @@ list_roads_all_map = center_map nearRoads radius_map;
 	sleep 10;
 	// chek admin or server
 
-	[[], {if((call BIS_fnc_admin) > 0)then{select_client_admin = clientOwner; publicVariable "select_client_admin"};}] remoteExec ["call", 0];
+	[[], {if(((call BIS_fnc_admin) > 0) or serverCommandAvailable "#kick")then{select_client_admin = clientOwner; publicVariable "select_client_admin"};}] remoteExec ["call", 0];
 
 	[]spawn{
 		waitUntil{
@@ -851,7 +851,7 @@ if((hevy_enemy_vehicle_arry select 0) isNotEqualTo "<NULL-object>")then{
 
 
 
-	if((heli_frendly_vehecle_arry select 0) isNotEqualTo "<NULL-object>")then{
+	if(((heli_frendly_vehecle_arry select 0) isNotEqualTo "<NULL-object>") and (isClass (configFile >> "CfgPatches" >> "ace_main")))then{
 
 		[
 			Noyt_1,											// Object the action is attached to
@@ -1108,41 +1108,42 @@ Noyt_1,											// Object the action is attached to
 	false												// Show in unconscious state
 ] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Спасти заложника"],										// Title of the action
-	"a3\ui_f\data\igui\cfg\holdactions\holdaction_requestleadership_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f\data\igui\cfg\holdactions\holdaction_requestleadership_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{  
-				private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-				private _select_location = selectRandom _nearbyLocations; 
-				private _locationPos = locationPosition _select_location; 
-				_locationPos set [2,0]; 
-				pos_mision_11 = _locationPos; 
-				[ 
-					pos_mision_11, 
-					inf_civilian_missions_arry, 
-					inf_enemy_missions_arry, 
-					300, 
-					pos_base 
-				] execVM 'Other_mission\mission_11_reqvest_zaloznic\mission_1.sqf'; 
-			};  
-		}] remoteExec ['call',2];  
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
+if(isClass (configFile >> "CfgPatches" >> "ace_main"))then{
+	[
+	Noyt_1,											// Object the action is attached to
+		format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Спасти заложника"],										// Title of the action
+		"a3\ui_f\data\igui\cfg\holdactions\holdaction_requestleadership_ca.paa",	// Idle icon shown on screen
+		"a3\ui_f\data\igui\cfg\holdactions\holdaction_requestleadership_ca.paa",	// Progress icon shown on screen
+		"_this distance _target < 3",						// Condition for the action to be shown
+		"_caller distance _target < 3",						// Condition for the action to progress
+		{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+		{},													// Code executed on every progress tick
+		{ 
+			[[], {  
+				[] spawn{  
+					private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+					private _select_location = selectRandom _nearbyLocations; 
+					private _locationPos = locationPosition _select_location; 
+					_locationPos set [2,0]; 
+					pos_mision_11 = _locationPos; 
+					[ 
+						pos_mision_11, 
+						inf_civilian_missions_arry, 
+						inf_enemy_missions_arry, 
+						300, 
+						pos_base 
+					] execVM 'Other_mission\mission_11_reqvest_zaloznic\mission_1.sqf'; 
+				};  
+			}] remoteExec ['call',2];  
+		},				// Code executed on completion
+		{},													// Code executed on interrupted
+		[],									// Arguments passed to the scripts as _this select 3
+		3,													// Action duration in seconds
+		0,													// Priority
+		false,												// Remove on completion
+		false												// Show in unconscious state
+	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+};
 
 [
 Noyt_1,											// Object the action is attached to

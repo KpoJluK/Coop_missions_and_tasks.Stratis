@@ -8,7 +8,7 @@ class Header
 	maxPlayers = 64;	// maximum number of players the mission supports
 };
 
-respawn = "base";
+respawn = 3;
 respawnButton = 1;
 respawnDelay = 10;
 saving = 0;
@@ -91,7 +91,7 @@ class Params
 	};
 		class Wather_random
 	{
-		title = "Постоянная смена погоды";
+		title = "динамичесая смена погоды";
         texts[] = {"Нет","Да"};
 		values[] = {0,1};
 		default = 1;

@@ -51,7 +51,7 @@ if(!alive _unit_persona)exitWith{
 	["Task_16","FAILED"] call BIS_fnc_taskSetState;
 	["Task_16"] call BIS_fnc_deleteTask;
 };
-
+te
 _unit_persona action ["Eject", vehicle (_vehicle_Perehvat select 0)];
 
 waitUntil{
