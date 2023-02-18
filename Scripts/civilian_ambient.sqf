@@ -14,6 +14,8 @@ _nearbyLocations_name_vilage = nearestLocations [center_map, ['NameVillage'], ra
 
 // spawn civilian
 
+if(_nearbyLocations_name isNotEqualTo []) then{
+
 {
 	_locationPos = locationPosition _x;  
 
@@ -50,7 +52,10 @@ _nearbyLocations_name_vilage = nearestLocations [center_map, ['NameVillage'], ra
 	};
 	
 } forEach _nearbyLocations_name;
+};
 
+
+if(_nearbyLocations_name_city isNotEqualTo []) then{
 {
 	_locationPos = locationPosition _x;  
 
@@ -85,7 +90,9 @@ _nearbyLocations_name_vilage = nearestLocations [center_map, ['NameVillage'], ra
 	};
 	
 } forEach _nearbyLocations_name_city;
+};
 
+if(_nearbyLocations_name_city_capital isNotEqualTo []) then{
 {
 	_locationPos = locationPosition _x;  
 
@@ -122,8 +129,9 @@ _nearbyLocations_name_vilage = nearestLocations [center_map, ['NameVillage'], ra
 	};
 	
 } forEach _nearbyLocations_name_city_capital;
+};
 
-
+if(_nearbyLocations_name_vilage isNotEqualTo []) then{
 {
 	_locationPos = locationPosition _x;  
 
@@ -160,3 +168,4 @@ _nearbyLocations_name_vilage = nearestLocations [center_map, ['NameVillage'], ra
 	};
 	
 } forEach _nearbyLocations_name_vilage;
+};
