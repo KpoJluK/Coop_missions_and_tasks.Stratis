@@ -23,7 +23,7 @@ waitUntil {!isNull (finddisplay 46)};
 player addEventHandler [
     "Killed",
     {
-["Initialize", [player, [], true]] call BIS_fnc_EGSpectator;
+		["Initialize", [player, [], true]] call BIS_fnc_EGSpectator;
         [player, [missionNamespace, "Inventory_on_death"]] call BIS_fnc_saveInventory;
         true
     }
@@ -31,7 +31,8 @@ player addEventHandler [
 
 player addEventHandler [
     "Respawn",
-    {["Terminate"] call BIS_fnc_EGSpectator;
+    {
+		["Terminate"] call BIS_fnc_EGSpectator;
         player setPos(getPos Flag_1);
         [player] joinSilent player_Group;
         if(isNil {missionNamespace getVariable "player_saves_Inventory"})then{[player, [missionNamespace, "Inventory_on_death"]] call BIS_fnc_loadInventory;}else{[player, [missionNamespace, "player_saves_Inventory"]] call BIS_fnc_loadInventory;};
