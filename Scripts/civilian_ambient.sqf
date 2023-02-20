@@ -21,12 +21,13 @@ if(_nearbyLocations_name isNotEqualTo [])then{
 
 		[_locationPos, 4]spawn{
 
-			params["_locationPos", "_count"];
+			params["_locationPos", "_coun_generalt"];
 
 			sleep random 20;
 			// inf
 			_group_civilian = createGroup [civilian, true];
 			_group_civilian enableDynamicSimulation true;
+			_count = _coun_generalt;
 			waitUntil{
 				_count = _count - 1;
 				_unit = _group_civilian createUnit [selectRandom inf_civilian_missions_arry, _locationPos, [], 0, "FORM"];
@@ -58,12 +59,13 @@ if(_nearbyLocations_name_city isNotEqualTo [])then{
 	{
 		_locationPos = locationPosition _x;  
 
-		params["_locationPos", "_count"];
+		params["_locationPos", "_coun_generalt"];
 
 		sleep random 20;
 		// inf
 		_group_civilian = createGroup [civilian, true];
 		_group_civilian enableDynamicSimulation true;
+		_count = _coun_generalt;
 		waitUntil{
 			_count = _count - 1;
 			_unit = _group_civilian createUnit [selectRandom inf_civilian_missions_arry, _locationPos, [], 0, "FORM"];
@@ -96,12 +98,13 @@ if(_nearbyLocations_name_city_capital isNotEqualTo [])then{
 
 		[_locationPos, 8]spawn{
 
-			params["_locationPos", "_count"];
+			params["_locationPos", "_coun_generalt"];
 
 			sleep random 20;
 			// inf
 			_group_civilian = createGroup [civilian, true];
 			_group_civilian enableDynamicSimulation true;
+			_count = _coun_generalt;
 			waitUntil{
 				_count = _count - 1;
 				_unit = _group_civilian createUnit [selectRandom inf_civilian_missions_arry, _locationPos, [], 0, "FORM"];
@@ -137,12 +140,13 @@ if(_nearbyLocations_name_vilage isNotEqualTo [])then{
 
 		[_locationPos, 2]spawn{
 
-			params["_locationPos", "_count"];
+			params["_locationPos", "_coun_generalt"];
 
 			sleep random 20;
 			// inf
 			_group_civilian = createGroup [civilian, true];
 			_group_civilian enableDynamicSimulation true;
+			_count = _coun_generalt;
 			waitUntil{
 				_count = _count - 1;
 				_unit = _group_civilian createUnit [selectRandom inf_civilian_missions_arry, _locationPos, [], 0, "FORM"];
