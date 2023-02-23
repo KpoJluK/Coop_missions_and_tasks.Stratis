@@ -57,7 +57,7 @@ if(_nearbyLocations_name_city isNotEqualTo [])then{
 
 		_locationPos = locationPosition _x;  
 
-		[_locationPos, 4]spawn{
+		[_locationPos, 6]spawn{
 
 			params["_locationPos", "_coun_general"];
 			sleep random 20;
@@ -95,7 +95,7 @@ if(_nearbyLocations_name_city_capital isNotEqualTo [])then{
 
 		_locationPos = locationPosition _x;  
 
-		[_locationPos, 4]spawn{
+		[_locationPos, 8]spawn{
 
 			params["_locationPos", "_coun_general"];
 			sleep random 20;

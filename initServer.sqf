@@ -183,8 +183,9 @@ list_roads_all_map = center_map nearRoads radius_map;
 
 	// add action
 
+	[[], {hintSilent "Ожидание загрузки всех фракций..."}] remoteExec ["call", 0];
+	sleep 30;
 	
-
 	{
 		[
 			Noyt_1,											// Object the action is attached to
@@ -783,81 +784,122 @@ if(paramsArray select 9 > 0)then{
 [] execVM "Scripts\paradrop.sqf";
 
 /////////////--------------------------- add missions --------------------------//////////////////////
-if((hevy_enemy_vehicle_arry select 0) isNotEqualTo "<NULL-object>")then{
-	[
+
+if(paramsArray select 10 < 16)then{
+	fn_add_ation_mission = {
+		[[], {removeAllActions Noyt_1}] remoteExec ['call',0];
+
+		if((hevy_enemy_vehicle_arry select 0) isNotEqualTo "<NULL-object>")then{
+			[
+				Noyt_1,											// Object the action is attached to
+				format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Миссия уничтожить танк"],										// Title of the action
+				"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Idle icon shown on screen
+				"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Progress icon shown on screen
+				"_this distance _target < 3",						// Condition for the action to be shown
+				"_caller distance _target < 3",						// Condition for the action to progress
+				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+				{},													// Code executed on every progress tick
+				{ 
+					[[], {  
+						[] spawn{  
+							private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map];  
+							private _select_location = selectRandom _nearbyLocations;  
+							private _locationPos = locationPosition _select_location;  
+							private _list_roads = _locationPos nearRoads 500;  
+							private _select_road = selectRandom _list_roads;  
+							pos_mision_1 = getPos _select_road;  
+							[pos_mision_1,selectRandom hevy_enemy_vehicle_arry,enemy_side,1500] execVM 'Other_mission\mission_1_destroy_tank\mission_1.sqf'  
+						};
+					}] remoteExec ['call',2]; 
+				},				// Code executed on completion
+				{},													// Code executed on interrupted
+				[],									// Arguments passed to the scripts as _this select 3
+				3,													// Action duration in seconds
+				0,													// Priority
+				false,												// Remove on completion
+				false												// Show in unconscious state
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+		};
+
+		if((heli_enemy_vehecle_arry select 0) isNotEqualTo "<NULL-object>")then{
+
+			[
+				Noyt_1,											// Object the action is attached to
+				format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Миссия уничтожить вертолет"],										// Title of the action
+				"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Idle icon shown on screen
+				"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Progress icon shown on screen
+				"_this distance _target < 3",						// Condition for the action to be shown
+				"_caller distance _target < 3",						// Condition for the action to progress
+				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+				{},													// Code executed on every progress tick
+				{ 
+					[[], {  
+						[] spawn{  
+							private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map];  
+							private _select_location = selectRandom _nearbyLocations;  
+							private _locationPos = locationPosition _select_location;  
+							private _list_roads = _locationPos nearRoads 500;  
+							private _select_road = selectRandom _list_roads;  
+							pos_mision_2 = getPos _select_road;  
+							[pos_mision_2,selectRandom heli_enemy_vehecle_arry,enemy_side,1500] execVM 'Other_mission\mission_2_destroy_helocopter\mission_1.sqf' 
+						};
+					}] remoteExec ['call',2];
+				},				// Code executed on completion
+				{},													// Code executed on interrupted
+				[],									// Arguments passed to the scripts as _this select 3
+				3,													// Action duration in seconds
+				0,													// Priority
+				false,												// Remove on completion
+				false												// Show in unconscious state
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+		};
+
+
+
+		if(((heli_frendly_vehecle_arry select 0) isNotEqualTo "<NULL-object>") and (isClass (configFile >> "CfgPatches" >> "ace_main")))then{
+
+			[
+				Noyt_1,											// Object the action is attached to
+				format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Эвакуировать пилотов сбитого вертолета"],										// Title of the action
+				"a3\ui_f_oldman\data\igui\cfg\holdactions\meet_ca.paa",	// Idle icon shown on screen
+				"a3\ui_f_oldman\data\igui\cfg\holdactions\meet_ca.paa",	// Progress icon shown on screen
+				"_this distance _target < 3",						// Condition for the action to be shown
+				"_caller distance _target < 3",						// Condition for the action to progress
+				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+				{},													// Code executed on every progress tick
+				{ 
+					[[], {  
+						[] spawn{  
+							private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+							private _select_location = selectRandom _nearbyLocations; 
+							private _locationPos = locationPosition _select_location; 
+							_locationPos set [2,0]; 
+							pos_mision_3 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
+							_select_next_location = nearestLocation [pos_mision_3, 'NameVillage']; 
+							pos_mision_3_next = locationPosition _select_next_location; 
+							pos_mision_3_next set[2,0]; 
+							[pos_mision_3,selectRandom heli_frendly_vehecle_arry,pos_mision_3_next,player_side,(inf_frendly_missions_arry select 0),pos_base] execVM 'Other_mission\mission_3_reqvest_pilots\mission_1.sqf' 
+						};  
+					}] remoteExec ['call',2]; 
+				},				// Code executed on completion
+				{},													// Code executed on interrupted
+				[],									// Arguments passed to the scripts as _this select 3
+				3,													// Action duration in seconds
+				0,													// Priority
+				false,												// Remove on completion
+				false												// Show in unconscious state
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+
+		};
+
+
+		[
 		Noyt_1,											// Object the action is attached to
-		format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Миссия уничтожить танк"],										// Title of the action
-		"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Idle icon shown on screen
-		"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Progress icon shown on screen
-		"_this distance _target < 3",						// Condition for the action to be shown
-		"_caller distance _target < 3",						// Condition for the action to progress
-		{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-		{},													// Code executed on every progress tick
-		{ 
-			[[], {  
-				[] spawn{  
-					private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map];  
-					private _select_location = selectRandom _nearbyLocations;  
-					private _locationPos = locationPosition _select_location;  
-					private _list_roads = _locationPos nearRoads 500;  
-					private _select_road = selectRandom _list_roads;  
-					pos_mision_1 = getPos _select_road;  
-					[pos_mision_1,selectRandom hevy_enemy_vehicle_arry,enemy_side,1500] execVM 'Other_mission\mission_1_destroy_tank\mission_1.sqf'  
-				};
-			}] remoteExec ['call',2]; 
-		},				// Code executed on completion
-		{},													// Code executed on interrupted
-		[],									// Arguments passed to the scripts as _this select 3
-		3,													// Action duration in seconds
-		0,													// Priority
-		false,												// Remove on completion
-		false												// Show in unconscious state
-	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-};
-
-	if((heli_enemy_vehecle_arry select 0) isNotEqualTo "<NULL-object>")then{
-
-		[
-			Noyt_1,											// Object the action is attached to
-			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Миссия уничтожить вертолет"],										// Title of the action
-			"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Idle icon shown on screen
-			"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Progress icon shown on screen
-			"_this distance _target < 3",						// Condition for the action to be shown
-			"_caller distance _target < 3",						// Condition for the action to progress
-			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-			{},													// Code executed on every progress tick
-			{ 
-				[[], {  
-					[] spawn{  
-						private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map];  
-						private _select_location = selectRandom _nearbyLocations;  
-						private _locationPos = locationPosition _select_location;  
-						private _list_roads = _locationPos nearRoads 500;  
-						private _select_road = selectRandom _list_roads;  
-						pos_mision_2 = getPos _select_road;  
-						[pos_mision_2,selectRandom heli_enemy_vehecle_arry,enemy_side,1500] execVM 'Other_mission\mission_2_destroy_helocopter\mission_1.sqf' 
-					};
-				}] remoteExec ['call',2];
-			},				// Code executed on completion
-			{},													// Code executed on interrupted
-			[],									// Arguments passed to the scripts as _this select 3
-			3,													// Action duration in seconds
-			0,													// Priority
-			false,												// Remove on completion
-			false												// Show in unconscious state
-		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-	};
-
-
-
-	if(((heli_frendly_vehecle_arry select 0) isNotEqualTo "<NULL-object>") and (isClass (configFile >> "CfgPatches" >> "ace_main")))then{
-
-		[
-			Noyt_1,											// Object the action is attached to
-			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Эвакуировать пилотов сбитого вертолета"],										// Title of the action
-			"a3\ui_f_oldman\data\igui\cfg\holdactions\meet_ca.paa",	// Idle icon shown on screen
-			"a3\ui_f_oldman\data\igui\cfg\holdactions\meet_ca.paa",	// Progress icon shown on screen
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Найти сбитый беспилотник"],										// Title of the action
+			"a3\ui_f\data\igui\cfg\holdactions\holdaction_search_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f\data\igui\cfg\holdactions\holdaction_search_ca.paa",	// Progress icon shown on screen
 			"_this distance _target < 3",						// Condition for the action to be shown
 			"_caller distance _target < 3",						// Condition for the action to progress
 			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
@@ -869,11 +911,341 @@ if((hevy_enemy_vehicle_arry select 0) isNotEqualTo "<NULL-object>")then{
 						private _select_location = selectRandom _nearbyLocations; 
 						private _locationPos = locationPosition _select_location; 
 						_locationPos set [2,0]; 
-						pos_mision_3 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
-						_select_next_location = nearestLocation [pos_mision_3, 'NameVillage']; 
-						pos_mision_3_next = locationPosition _select_next_location; 
-						pos_mision_3_next set[2,0]; 
-						[pos_mision_3,selectRandom heli_frendly_vehecle_arry,pos_mision_3_next,player_side,(inf_frendly_missions_arry select 0),pos_base] execVM 'Other_mission\mission_3_reqvest_pilots\mission_1.sqf' 
+						pos_mision_4 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
+						[ 
+							pos_mision_4, 
+							'B_UAV_02_dynamicLoadout_F', 
+							selectRandom car_enemy_mission_arry, 
+							selectRandom heli_enemy_vehecle_arry, 
+							enemy_side, 
+							inf_enemy_missions_arry 
+						] execVM 'Other_mission\mission_4_find_bespilotnik\mission_1.sqf'; 
+					};  
+				}] remoteExec ['call',2];  
+			},				// Code executed on completion
+			{},													// Code executed on interrupted
+			[],									// Arguments passed to the scripts as _this select 3
+			3,													// Action duration in seconds
+			0,													// Priority
+			false,												// Remove on completion
+			false												// Show in unconscious state
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+
+		[
+		Noyt_1,											// Object the action is attached to
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить груз"],										// Title of the action
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Progress icon shown on screen
+			"_this distance _target < 3",						// Condition for the action to be shown
+			"_caller distance _target < 3",						// Condition for the action to progress
+			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+			{},													// Code executed on every progress tick
+			{ 
+				[[], {  
+					[] spawn{  
+						private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+						private _select_location = selectRandom _nearbyLocations; 
+						private _locationPos = locationPosition _select_location; 
+						private _list_roads = _locationPos nearRoads 500; 
+						private _select_road = selectRandom _list_roads; 
+						pos_mision_5 = getPos _select_road; 
+						[pos_mision_5,'Box_NATO_AmmoVeh_F',car_frendly_mission_arry,pos_base] execVM 'Other_mission\mission_5_destroy_cargo\mission_1.sqf'; 
+					};  
+				}] remoteExec ['call',2];  
+			},				// Code executed on completion
+			{},													// Code executed on interrupted
+			[],									// Arguments passed to the scripts as _this select 3
+			3,													// Action duration in seconds
+			0,													// Priority
+			false,												// Remove on completion
+			false												// Show in unconscious state
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+		if((heli_frendly_vehecle_arry select 0) isNotEqualTo "<NULL-object>")then{
+			[
+			Noyt_1,											// Object the action is attached to
+				format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Забрать чёрный ящик с упавшего вертолета"],										// Title of the action
+				"a3\ui_f\data\igui\cfg\holdactions\holdaction_unloaddevice_ca.paa",	// Idle icon shown on screen
+				"a3\ui_f\data\igui\cfg\holdactions\holdaction_unloaddevice_ca.paa",	// Progress icon shown on screen
+				"_this distance _target < 3",						// Condition for the action to be shown
+				"_caller distance _target < 3",						// Condition for the action to progress
+				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+				{},													// Code executed on every progress tick
+				{ 
+					[[], {  
+						[] spawn{  
+							private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+							private _select_location = selectRandom _nearbyLocations; 
+							private _locationPos = locationPosition _select_location; 
+							_locationPos set [2,0]; 
+							pos_mision_6 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
+							[pos_mision_6,selectRandom heli_frendly_vehecle_arry,'C_IDAP_supplyCrate_F',pos_base] execVM 'Other_mission\mission_6_reqvest_black_cargo\mission_1.sqf'; 
+						};  
+					}] remoteExec ['call',2];   
+				},				// Code executed on completion
+				{},													// Code executed on interrupted
+				[],									// Arguments passed to the scripts as _this select 3
+				3,													// Action duration in seconds
+				0,													// Priority
+				false,												// Remove on completion
+				false												// Show in unconscious state
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+		};
+
+		[
+		Noyt_1,											// Object the action is attached to
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить артилерию"],										// Title of the action
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Progress icon shown on screen
+			"_this distance _target < 3",						// Condition for the action to be shown
+			"_caller distance _target < 3",						// Condition for the action to progress
+			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+			{},													// Code executed on every progress tick
+			{ 
+				[[], {  
+					[] spawn{  
+						private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+						private _select_location = selectRandom _nearbyLocations; 
+						private _locationPos = locationPosition _select_location; 
+						_locationPos set [2,0]; 
+						pos_mision_7 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
+						[pos_mision_7,'I_Truck_02_MRL_F',getPos MHQ_1] execVM 'Other_mission\mission_7_destroy_artilery\mission_1.sqf' 
+					};  
+				}] remoteExec ['call',2];   
+			},				// Code executed on completion
+			{},													// Code executed on interrupted
+			[],									// Arguments passed to the scripts as _this select 3
+			3,													// Action duration in seconds
+			0,													// Priority
+			false,												// Remove on completion
+			false												// Show in unconscious state
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+		[
+		Noyt_1,											// Object the action is attached to
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить колонну(может не работать на маленьких картах)"],										// Title of the action
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Progress icon shown on screen
+			"_this distance _target < 3",						// Condition for the action to be shown
+			"_caller distance _target < 3",						// Condition for the action to progress
+			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+			{},													// Code executed on every progress tick
+			{ 
+				[[], {     
+					[] spawn{
+						_count_popitoc = 0;
+						waitUntil{
+							pos_mision_8 = [0,0,0];
+							private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map];    
+							private _randomLoacation = getPos selectRandom _nearbyLocations;   
+							pos_mision_8 = [_randomLoacation, 200, 1000, 50, 0, 0.9, 0] call BIS_fnc_findSafePos;
+							_count_popitoc =  _count_popitoc + 1;
+							if(_count_popitoc > 1000)exitWith{true};
+							!(pos_mision_8 inArea [[0,0,0], 1000, 1000, 0, false])
+						};
+						if(_count_popitoc > 1000)exitWith{hint"Невозможно создать маршрут, задание отменено!"};     
+						[pos_mision_8] execVM 'Other_mission\mission_8_destroy_vehicle_before\mission_1.sqf'    
+					};     
+				}] remoteExec ['call',2]; 
+			},				// Code executed on completion
+			{},													// Code executed on interrupted
+			[],									// Arguments passed to the scripts as _this select 3
+			3,													// Action duration in seconds
+			0,													// Priority
+			false,												// Remove on completion
+			false												// Show in unconscious state
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+		[
+		Noyt_1,											// Object the action is attached to
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Освободить город"],										// Title of the action
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Progress icon shown on screen
+			"_this distance _target < 3",						// Condition for the action to be shown
+			"_caller distance _target < 3",						// Condition for the action to progress
+			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+			{},													// Code executed on every progress tick
+			{ 
+				[[], {  
+					[] spawn{  
+						private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+						private _randomLoacation = getPos selectRandom _nearbyLocations; 
+						private _nearestRoad = [_randomLoacation, 500] call BIS_fnc_nearestRoad; 
+						pos_mision_9 = getPos _nearestRoad; 
+						[pos_mision_9] execVM 'Other_mission\mission_9_liberate_city\mission_1.sqf' 
+					};  
+				}] remoteExec ['call',2];
+			},				// Code executed on completion
+			{},													// Code executed on interrupted
+			[],									// Arguments passed to the scripts as _this select 3
+			3,													// Action duration in seconds
+			0,													// Priority
+			false,												// Remove on completion
+			false												// Show in unconscious state
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+			
+		[
+		Noyt_1,											// Object the action is attached to
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить РЛС"],										// Title of the action
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Progress icon shown on screen
+			"_this distance _target < 3",						// Condition for the action to be shown
+			"_caller distance _target < 3",						// Condition for the action to progress
+			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+			{},													// Code executed on every progress tick
+			{ 
+				[[], {  
+					[] spawn{  
+						private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'],radius_map]; 
+						private _select_location = selectRandom _nearbyLocations; 
+						private _locationPos = locationPosition _select_location; 
+						_locationPos set [2,0]; 
+						pos_mision_10 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
+						[pos_mision_10] execVM 'Other_mission\mission_10_destroy_rls\mission_1.sqf' 
+					};  
+				}] remoteExec ['call',2];  
+			},				// Code executed on completion
+			{},													// Code executed on interrupted
+			[],									// Arguments passed to the scripts as _this select 3
+			3,													// Action duration in seconds
+			0,													// Priority
+			false,												// Remove on completion
+			false												// Show in unconscious state
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+		if(isClass (configFile >> "CfgPatches" >> "ace_main"))then{
+			[
+			Noyt_1,											// Object the action is attached to
+				format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Спасти заложника"],										// Title of the action
+				"a3\ui_f\data\igui\cfg\holdactions\holdaction_requestleadership_ca.paa",	// Idle icon shown on screen
+				"a3\ui_f\data\igui\cfg\holdactions\holdaction_requestleadership_ca.paa",	// Progress icon shown on screen
+				"_this distance _target < 3",						// Condition for the action to be shown
+				"_caller distance _target < 3",						// Condition for the action to progress
+				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+				{},													// Code executed on every progress tick
+				{ 
+					[[], {  
+						[] spawn{  
+							private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+							private _select_location = selectRandom _nearbyLocations; 
+							private _locationPos = locationPosition _select_location; 
+							_locationPos set [2,0]; 
+							pos_mision_11 = _locationPos; 
+							[ 
+								pos_mision_11, 
+								inf_civilian_missions_arry, 
+								inf_enemy_missions_arry, 
+								300, 
+								pos_base 
+							] execVM 'Other_mission\mission_11_reqvest_zaloznic\mission_1.sqf'; 
+						};  
+					}] remoteExec ['call',2];  
+				},				// Code executed on completion
+				{},													// Code executed on interrupted
+				[],									// Arguments passed to the scripts as _this select 3
+				3,													// Action duration in seconds
+				0,													// Priority
+				false,												// Remove on completion
+				false												// Show in unconscious state
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+		};
+
+		[
+		Noyt_1,											// Object the action is attached to
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Захватить или убить офицера"],										// Title of the action
+			"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Progress icon shown on screen
+			"_this distance _target < 3",						// Condition for the action to be shown
+			"_caller distance _target < 3",						// Condition for the action to progress
+			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+			{},													// Code executed on every progress tick
+			{ 
+				[[], {  
+					[] spawn{  
+						private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+						private _select_location = selectRandom _nearbyLocations; 
+						private _locationPos = locationPosition _select_location; 
+						_locationPos set [2,0]; 
+						pos_mision_12 = _locationPos; 
+						[ 
+							pos_mision_12, 
+							['I_officer_F','O_officer_F','B_officer_F'], 
+							inf_enemy_missions_arry, 
+							300, 
+							pos_base 
+						] execVM 'Other_mission\mission_12_capture_officere\mission_1.sqf'; 
+					};  
+				}] remoteExec ['call',2];  
+			},				// Code executed on completion
+			{},													// Code executed on interrupted
+			[],									// Arguments passed to the scripts as _this select 3
+			3,													// Action duration in seconds
+			0,													// Priority
+			false,												// Remove on completion
+			false												// Show in unconscious state
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+
+		[
+		Noyt_1,											// Object the action is attached to
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить хим оружие(На карте должен быть водоем!)"],										// Title of the action
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Progress icon shown on screen
+			"_this distance _target < 3",						// Condition for the action to be shown
+			"_caller distance _target < 3",						// Condition for the action to progress
+			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+			{},													// Code executed on every progress tick
+			{ 
+				[[], {  
+					[] spawn{ 
+						_nearbyLocations = nearestLocations [center_map, ['NameMarine'], radius_map]; 
+						if(_nearbyLocations isEqualTo [])exitWith{hint "Не найдно подходящей локации для задания"}; 
+						pos_mision_13 = [0,0,0]; 
+						_count_poputoc = 0; 
+						waitUntil{  
+							_select_location = selectRandom _nearbyLocations;  
+							_locationPos = locationPosition _select_location;  
+							pos_mision_13 = _locationPos getPos [1000, random 360];  
+							pos_mision_13 set [2,0];
+							_count_poputoc = _count_poputoc + 1;
+							if(_count_poputoc > 1000)exitWith{true};
+							((ASLToATL pos_mision_13)select 2) >= 10 and ((ASLToATL pos_mision_13)select 2) <= 40  
+						}; 
+						if(_count_poputoc > 1000)exitWith{hint "Не найдно подходящей локации для задания"}; 
+						[pos_mision_13,enemy_side] execVM 'Other_mission\mission_13_recwest_lab_box(water)\mission_1.sqf'; 
+					}; 
+				}] remoteExec ['call',2];   
+			},				// Code executed on completion
+			{},													// Code executed on interrupted
+			[],									// Arguments passed to the scripts as _this select 3
+			3,													// Action duration in seconds
+			0,													// Priority
+			false,												// Remove on completion
+			false												// Show in unconscious state
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+		[
+		Noyt_1,											// Object the action is attached to
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Обезвредить бомбу в населенном пункте"],										// Title of the action
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Progress icon shown on screen
+			"_this distance _target < 3",						// Condition for the action to be shown
+			"_caller distance _target < 3",						// Condition for the action to progress
+			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+			{},													// Code executed on every progress tick
+			{ 
+				[[], {  
+					[] spawn{  
+						private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+						private _select_location = selectRandom _nearbyLocations; 
+						private _locationPos = locationPosition _select_location;
+						_find_road = [_locationPos, 500] call BIS_fnc_nearestRoad;
+						pos_mision_14 = getPos _find_road; 
+						[ 
+							pos_mision_14, 
+							3600
+						] execVM 'Other_mission\mission_14_defuse_bomb\mission_1.sqf'; 
 					};  
 				}] remoteExec ['call',2]; 
 			},				// Code executed on completion
@@ -886,454 +1258,124 @@ if((hevy_enemy_vehicle_arry select 0) isNotEqualTo "<NULL-object>")then{
 		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
 
+		[
+		Noyt_1,											// Object the action is attached to
+			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Оказать помощь раненой персоне"],										// Title of the action
+			"a3\ui_f\data\igui\cfg\actions\heal_ca.paa",	// Idle icon shown on screen
+			"a3\ui_f\data\igui\cfg\actions\heal_ca.paa",	// Progress icon shown on screen
+			"_this distance _target < 3",						// Condition for the action to be shown
+			"_caller distance _target < 3",						// Condition for the action to progress
+			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+			{},													// Code executed on every progress tick
+			{ 
+				[[], {  
+					[] spawn{  
+						private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
+						private _select_location = selectRandom _nearbyLocations; 
+						pos_mision_15 = locationPosition _select_location;
+						[ 
+							pos_mision_15,
+							inf_civilian_missions_arry,
+							[
+								'C_IDAP_Man_Paramedic_01_F',
+								'C_Man_Paramedic_01_F'
+							]
+						] execVM 'Other_mission\mission_15_help_man\mission_1.sqf'; 
+					};  
+				}] remoteExec ['call',2];
+			},				// Code executed on completion
+			{},													// Code executed on interrupted
+			[],									// Arguments passed to the scripts as _this select 3
+			3,													// Action duration in seconds
+			0,													// Priority
+			false,												// Remove on completion
+			false												// Show in unconscious state
+		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+
+		_non_redy_car_from_mission_16 = "(getText (_x >> 'faction') == (enemy_fraction select 0)) and ((configName _x isKindOf ""Car"" or configName _x isKindOf ""Truck"") and getNumber (_x >> 'transportSoldier') >= 5)" configClasses (configFile >> "CfgVehicles");
+
+		car_from_mission_16 = [];
+
+		{
+			car_from_mission_16 pushBack (configName _x)
+		} forEach _non_redy_car_from_mission_16;
+
+		{ 
+			if(getNumber (configFile >> "CfgVehicles" >> _x >> "scope") < 1)then{car_from_mission_16 = car_from_mission_16 - [_x]}; 
+		} forEach car_from_mission_16;
+
+		if(car_from_mission_16 isNotEqualTo [])then{
+			[
+				Noyt_1,											// Object the action is attached to
+				format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Перехват"],										// Title of the action
+				"a3\ui_f\data\igui\cfg\actions\obsolete\ui_action_cancel_manualfire_ca.paa",	// Idle icon shown on screen
+				"a3\ui_f\data\igui\cfg\actions\obsolete\ui_action_cancel_manualfire_ca.paa",	// Progress icon shown on screen
+				"_this distance _target < 3",						// Condition for the action to be shown
+				"_caller distance _target < 3",						// Condition for the action to progress
+				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+				{},													// Code executed on every progress tick
+				{ 
+					[[], {
+							
+						[] spawn{
+							pos_mision_16 = [0,0,0];
+							_count_popitoc = 0;
+							waitUntil{
+								_count_popitoc = _count_popitoc + 1;
+								private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map];    
+								private _randomLoacation = getPos selectRandom _nearbyLocations;
+								if(_count_popitoc > 1000)exitWith{true};
+								private _nearest_road = [_randomLoacation, 1000] call BIS_fnc_nearestRoad;
+								pos_mision_16 = getPos _nearest_road;
+								pos_mision_16 inArea [_randomLoacation, 1000, 1000, 45, true]
+							};
+							if(_count_popitoc > 1000)exitWith{hint "Не найдено подходяшей локации"};
+							[pos_mision_16, enemy_side, car_from_mission_16, inf_enemy_missions_arry, pos_base] execVM 'Other_mission\mission_16_perehvat\mission_1.sqf'    
+						};     
+					}] remoteExec ['call',2]; 
+				},				// Code executed on completion
+				{},													// Code executed on interrupted
+				[],									// Arguments passed to the scripts as _this select 3
+				3,													// Action duration in seconds
+				0,													// Priority
+				false,												// Remove on completion
+				false												// Show in unconscious state
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+		};
+
 	};
 
-
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Найти сбитый беспилотник"],										// Title of the action
-	"a3\ui_f\data\igui\cfg\holdactions\holdaction_search_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f\data\igui\cfg\holdactions\holdaction_search_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{  
-				private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-				private _select_location = selectRandom _nearbyLocations; 
-				private _locationPos = locationPosition _select_location; 
-				_locationPos set [2,0]; 
-				pos_mision_4 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
-				[ 
-					pos_mision_4, 
-					'B_UAV_02_dynamicLoadout_F', 
-					selectRandom car_enemy_mission_arry, 
-					selectRandom heli_enemy_vehecle_arry, 
-					enemy_side, 
-					inf_enemy_missions_arry 
-				] execVM 'Other_mission\mission_4_find_bespilotnik\mission_1.sqf'; 
-			};  
-		}] remoteExec ['call',2];  
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+	[] call fn_add_ation_mission;
 
 
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить груз"],										// Title of the action
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{  
-				private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-				private _select_location = selectRandom _nearbyLocations; 
-				private _locationPos = locationPosition _select_location; 
-				private _list_roads = _locationPos nearRoads 500; 
-				private _select_road = selectRandom _list_roads; 
-				pos_mision_5 = getPos _select_road; 
-				[pos_mision_5,'Box_NATO_AmmoVeh_F',car_frendly_mission_arry,pos_base] execVM 'Other_mission\mission_5_destroy_cargo\mission_1.sqf'; 
-			};  
-		}] remoteExec ['call',2];  
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+	// if set new admin
+	addMissionEventHandler ["OnUserAdminStateChanged", {
 
-if((heli_frendly_vehecle_arry select 0) isNotEqualTo "<NULL-object>")then{
-	[
-	Noyt_1,											// Object the action is attached to
-		format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Забрать чёрный ящик с упавшего вертолета"],										// Title of the action
-		"a3\ui_f\data\igui\cfg\holdactions\holdaction_unloaddevice_ca.paa",	// Idle icon shown on screen
-		"a3\ui_f\data\igui\cfg\holdactions\holdaction_unloaddevice_ca.paa",	// Progress icon shown on screen
-		"_this distance _target < 3",						// Condition for the action to be shown
-		"_caller distance _target < 3",						// Condition for the action to progress
-		{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-		{},													// Code executed on every progress tick
-		{ 
-			[[], {  
-				[] spawn{  
-					private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-					private _select_location = selectRandom _nearbyLocations; 
-					private _locationPos = locationPosition _select_location; 
-					_locationPos set [2,0]; 
-					pos_mision_6 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
-					[pos_mision_6,selectRandom heli_frendly_vehecle_arry,'C_IDAP_supplyCrate_F',pos_base] execVM 'Other_mission\mission_6_reqvest_black_cargo\mission_1.sqf'; 
-				};  
-			}] remoteExec ['call',2];   
-		},				// Code executed on completion
-		{},													// Code executed on interrupted
-		[],									// Arguments passed to the scripts as _this select 3
-		3,													// Action duration in seconds
-		0,													// Priority
-		false,												// Remove on completion
-		false												// Show in unconscious state
-	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-};
+		params ["_networkId", "_loggedIn", "_votedIn"];
+		if(_loggedIn)then{
 
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить артилерию"],										// Title of the action
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{  
-				private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-				private _select_location = selectRandom _nearbyLocations; 
-				private _locationPos = locationPosition _select_location; 
-				_locationPos set [2,0]; 
-				pos_mision_7 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
-				[pos_mision_7,'I_Truck_02_MRL_F',getPos MHQ_1] execVM 'Other_mission\mission_7_destroy_artilery\mission_1.sqf' 
-			};  
-		}] remoteExec ['call',2];   
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить колонну(может не работать на маленьких картах)"],										// Title of the action
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {     
-			[] spawn{
-				_count_popitoc = 0;
-				waitUntil{
-					pos_mision_8 = [0,0,0];
-					private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map];    
-					private _randomLoacation = getPos selectRandom _nearbyLocations;   
-					pos_mision_8 = [_randomLoacation, 200, 1000, 50, 0, 0.9, 0] call BIS_fnc_findSafePos;
-					_count_popitoc =  _count_popitoc + 1;
-					if(_count_popitoc > 1000)exitWith{true};
-					!(pos_mision_8 inArea [[0,0,0], 1000, 1000, 0, false])
-				};
-				if(_count_popitoc > 1000)exitWith{hint"Невозможно создать маршрут, задание отменено!"};     
-				[pos_mision_8] execVM 'Other_mission\mission_8_destroy_vehicle_before\mission_1.sqf'    
-			};     
-		}] remoteExec ['call',2]; 
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Освободить город"],										// Title of the action
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{  
-				private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-				private _randomLoacation = getPos selectRandom _nearbyLocations; 
-				private _nearestRoad = [_randomLoacation, 500] call BIS_fnc_nearestRoad; 
-				pos_mision_9 = getPos _nearestRoad; 
-				[pos_mision_9] execVM 'Other_mission\mission_9_liberate_city\mission_1.sqf' 
-			};  
-		}] remoteExec ['call',2];
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-	
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить РЛС"],										// Title of the action
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\attack_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{  
-				private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'],radius_map]; 
-				private _select_location = selectRandom _nearbyLocations; 
-				private _locationPos = locationPosition _select_location; 
-				_locationPos set [2,0]; 
-				pos_mision_10 = [_locationPos, 500, 1500, 20, 0, 0.5, 0] call BIS_fnc_findSafePos; 
-				[pos_mision_10] execVM 'Other_mission\mission_10_destroy_rls\mission_1.sqf' 
-			};  
-		}] remoteExec ['call',2];  
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-if(isClass (configFile >> "CfgPatches" >> "ace_main"))then{
-	[
-	Noyt_1,											// Object the action is attached to
-		format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Спасти заложника"],										// Title of the action
-		"a3\ui_f\data\igui\cfg\holdactions\holdaction_requestleadership_ca.paa",	// Idle icon shown on screen
-		"a3\ui_f\data\igui\cfg\holdactions\holdaction_requestleadership_ca.paa",	// Progress icon shown on screen
-		"_this distance _target < 3",						// Condition for the action to be shown
-		"_caller distance _target < 3",						// Condition for the action to progress
-		{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-		{},													// Code executed on every progress tick
-		{ 
-			[[], {  
-				[] spawn{  
-					private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-					private _select_location = selectRandom _nearbyLocations; 
-					private _locationPos = locationPosition _select_location; 
-					_locationPos set [2,0]; 
-					pos_mision_11 = _locationPos; 
-					[ 
-						pos_mision_11, 
-						inf_civilian_missions_arry, 
-						inf_enemy_missions_arry, 
-						300, 
-						pos_base 
-					] execVM 'Other_mission\mission_11_reqvest_zaloznic\mission_1.sqf'; 
-				};  
-			}] remoteExec ['call',2];  
-		},				// Code executed on completion
-		{},													// Code executed on interrupted
-		[],									// Arguments passed to the scripts as _this select 3
-		3,													// Action duration in seconds
-		0,													// Priority
-		false,												// Remove on completion
-		false												// Show in unconscious state
-	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-};
-
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Захватить или убить офицера"],										// Title of the action
-	"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f\data\igui\cfg\holdactions\holdaction_forcerespawn_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{  
-				private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-				private _select_location = selectRandom _nearbyLocations; 
-				private _locationPos = locationPosition _select_location; 
-				_locationPos set [2,0]; 
-				pos_mision_12 = _locationPos; 
-				[ 
-					pos_mision_12, 
-					['I_officer_F','O_officer_F','B_officer_F'], 
-					inf_enemy_missions_arry, 
-					300, 
-					pos_base 
-				] execVM 'Other_mission\mission_12_capture_officere\mission_1.sqf'; 
-			};  
-		}] remoteExec ['call',2];  
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Уничтожить хим оружие(На карте должен быть водоем!)"],										// Title of the action
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{ 
-				_nearbyLocations = nearestLocations [center_map, ['NameMarine'], radius_map]; 
-				if(_nearbyLocations isEqualTo [])exitWith{hint "Не найдно подходящей локации для задания"}; 
-				pos_mision_13 = [0,0,0]; 
-				_count_poputoc = 0; 
-				waitUntil{  
-					_select_location = selectRandom _nearbyLocations;  
-					_locationPos = locationPosition _select_location;  
-					pos_mision_13 = _locationPos getPos [1000, random 360];  
-					pos_mision_13 set [2,0];
-					_count_poputoc = _count_poputoc + 1;
-					if(_count_poputoc > 1000)exitWith{true};
-					((ASLToATL pos_mision_13)select 2) >= 10 and ((ASLToATL pos_mision_13)select 2) <= 40  
-				}; 
-				if(_count_poputoc > 1000)exitWith{hint "Не найдно подходящей локации для задания"}; 
-				[pos_mision_13,enemy_side] execVM 'Other_mission\mission_13_recwest_lab_box(water)\mission_1.sqf'; 
-			}; 
-		}] remoteExec ['call',2];   
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Обезвредить бомбу в населенном пункте"],										// Title of the action
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f_oldman\data\igui\cfg\holdactions\destroy_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{  
-				private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-				private _select_location = selectRandom _nearbyLocations; 
-				private _locationPos = locationPosition _select_location;
-				_find_road = [_locationPos, 500] call BIS_fnc_nearestRoad;
-				pos_mision_14 = getPos _find_road; 
-				[ 
-					pos_mision_14, 
-					3600
-				] execVM 'Other_mission\mission_14_defuse_bomb\mission_1.sqf'; 
-			};  
-		}] remoteExec ['call',2]; 
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-
-[
-Noyt_1,											// Object the action is attached to
-	format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Оказать помощь раненой персоне"],										// Title of the action
-	"a3\ui_f\data\igui\cfg\actions\heal_ca.paa",	// Idle icon shown on screen
-	"a3\ui_f\data\igui\cfg\actions\heal_ca.paa",	// Progress icon shown on screen
-	"_this distance _target < 3",						// Condition for the action to be shown
-	"_caller distance _target < 3",						// Condition for the action to progress
-	{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-	{},													// Code executed on every progress tick
-	{ 
-		[[], {  
-			[] spawn{  
-				private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map]; 
-				private _select_location = selectRandom _nearbyLocations; 
-				pos_mision_15 = locationPosition _select_location;
-				[ 
-					pos_mision_15,
-					inf_civilian_missions_arry,
-					[
-						'C_IDAP_Man_Paramedic_01_F',
-						'C_Man_Paramedic_01_F'
-					]
-				] execVM 'Other_mission\mission_15_help_man\mission_1.sqf'; 
-			};  
-		}] remoteExec ['call',2];
-	},				// Code executed on completion
-	{},													// Code executed on interrupted
-	[],									// Arguments passed to the scripts as _this select 3
-	3,													// Action duration in seconds
-	0,													// Priority
-	false,												// Remove on completion
-	false												// Show in unconscious state
-] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-
-_non_redy_car_from_mission_16 = "(getText (_x >> 'faction') == (enemy_fraction select 0)) and ((configName _x isKindOf ""Car"" or configName _x isKindOf ""Truck"") and getNumber (_x >> 'transportSoldier') >= 5)" configClasses (configFile >> "CfgVehicles");
-
-car_from_mission_16 = [];
-
-{
-	car_from_mission_16 pushBack (configName _x)
-} forEach _non_redy_car_from_mission_16;
-
-{ 
-	if(getNumber (configFile >> "CfgVehicles" >> _x >> "scope") < 1)then{car_from_mission_16 = car_from_mission_16 - [_x]}; 
-} forEach car_from_mission_16;
-
-if(car_from_mission_16 isNotEqualTo [])then{
-	[
-		Noyt_1,											// Object the action is attached to
-		format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>","Перехват"],										// Title of the action
-		"a3\ui_f\data\igui\cfg\actions\obsolete\ui_action_cancel_manualfire_ca.paa",	// Idle icon shown on screen
-		"a3\ui_f\data\igui\cfg\actions\obsolete\ui_action_cancel_manualfire_ca.paa",	// Progress icon shown on screen
-		"_this distance _target < 3",						// Condition for the action to be shown
-		"_caller distance _target < 3",						// Condition for the action to progress
-		{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-		{},													// Code executed on every progress tick
-		{ 
 			[[], {
+				if(((call BIS_fnc_admin) > 0) or serverCommandAvailable "#kick")then{
+
+					select_client_admin = clientOwner;
+					publicVariable "select_client_admin";
+					sleep 10;
 					
-				[] spawn{
-					pos_mision_16 = [0,0,0];
-					_count_popitoc = 0;
-					waitUntil{
-						_count_popitoc = _count_popitoc + 1;
-						private _nearbyLocations = nearestLocations [center_map, ['Name','NameCity','NameCityCapital','NameVillage'], radius_map];    
-						private _randomLoacation = getPos selectRandom _nearbyLocations;
-						if(_count_popitoc > 1000)exitWith{true};
-						private _nearest_road = [_randomLoacation, 1000] call BIS_fnc_nearestRoad;
-						pos_mision_16 = getPos _nearest_road;
-						pos_mision_16 inArea [_randomLoacation, 1000, 1000, 45, true]
-					};
-					if(_count_popitoc > 1000)exitWith{hint "Не найдено подходяшей локации"};
-					[pos_mision_16, enemy_side, car_from_mission_16, inf_enemy_missions_arry, pos_base] execVM 'Other_mission\mission_16_perehvat\mission_1.sqf'    
-				};     
-			}] remoteExec ['call',2]; 
-		},				// Code executed on completion
-		{},													// Code executed on interrupted
-		[],									// Arguments passed to the scripts as _this select 3
-		3,													// Action duration in seconds
-		0,													// Priority
-		false,												// Remove on completion
-		false												// Show in unconscious state
-	] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+
+				};
+			}] remoteExec ["call", 0];
+
+			[]spawn{
+				sleep 10;
+				[] call fn_add_ation_mission;
+			};
+			
+		}else{
+			[[], {removeAllActions Noyt_1}] remoteExec ['call',0];
+		};
+	}];
+}else{
+	[] execVM "Scripts\select_random_mission.sqf";
 };
+
