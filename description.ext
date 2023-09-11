@@ -105,5 +105,13 @@ class Params
 		default = 16;
         isGlobal = 1;
 	};
+		class Select_last_faction
+	{
+		title = "Будут выбраны фракции которые были в прошлой игре(если сохраненных факцый нету они будут выбраны рандомно)";
+        texts[] = {"Нет","Да"};
+		values[] = {2,3};
+		default = 3;
+        isGlobal = 1;
+	};
 };
 

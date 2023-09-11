@@ -162,117 +162,148 @@ list_roads_all_map = center_map nearRoads radius_map;
 	publicVariable "Civilian_side";
 
 	sleep 10;
-	// chek admin or server
 
-	[[], {if(((call BIS_fnc_admin) > 0) or serverCommandAvailable "#kick")then{select_client_admin = clientOwner; publicVariable "select_client_admin"};}] remoteExec ["call", 0];
+	// if set last laction load 
 
-	[]spawn{
+	if(paramsArray select 11 == 2)then{
+		// chek admin or server
+
+		[[], {if(((call BIS_fnc_admin) > 0) or serverCommandAvailable "#kick")then{select_client_admin = clientOwner; publicVariable "select_client_admin"};}] remoteExec ["call", 0];
+
+		[]spawn{
+			waitUntil{
+				[[], {hintSilent "Ожидание пока появится администртор"}] remoteExec ["call", 0];
+				sleep 20;
+				if!(isMultiplayer)exitWith{true};
+				!isNil "select_client_admin"
+			};
+		};
+
 		waitUntil{
-			[[], {hintSilent "Ожидание пока появится администртор"}] remoteExec ["call", 0];
-			sleep 20;
 			if!(isMultiplayer)exitWith{true};
 			!isNil "select_client_admin"
 		};
-	};
+		if!(isMultiplayer)then{select_client_admin = clientOwner;};
 
-	waitUntil{
-		if!(isMultiplayer)exitWith{true};
-		!isNil "select_client_admin"
-	};
-	if!(isMultiplayer)then{select_client_admin = clientOwner;};
+		// add action
 
-	// add action
+		[[], {hintSilent "Ожидание загрузки всех фракций..."}] remoteExec ["call", 0];
+		sleep 30;
+		
+		{
+			[
+				Noyt_1,											// Object the action is attached to
+				format ["<t size='2.0'><t color='#2e85ff'>%1</t></t>",((West_side select _forEachIndex) select 1)],										// Title of the action
+				((West_side select _forEachIndex) select 2),	// Idle icon shown on screen
+				((West_side select _forEachIndex) select 2),	// Progress icon shown on screen
+				"_this distance _target < 3",						// Condition for the action to be shown
+				"_caller distance _target < 3",						// Condition for the action to progress
+				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+				{},													// Code executed on every progress tick
+				{ 
+					player_faction = (West_side select((_this select 3)select 0));
+					player_side = WEST;
+					publicVariable "player_side";
+					publicVariable "player_faction";
+					removeAllActions Noyt_1;
+					profileNamespace setVariable ["player_side", player_side];
+					profileNamespace setVariable ["player_faction", player_faction];
+				},				// Code executed on completion
+				{},													// Code executed on interrupted
+				[_forEachIndex],									// Arguments passed to the scripts as _this select 3
+				1,													// Action duration in seconds
+				0,													// Priority
+				false,												// Remove on completion
+				false												// Show in unconscious state
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
-	[[], {hintSilent "Ожидание загрузки всех фракций..."}] remoteExec ["call", 0];
-	sleep 30;
-	
-	{
-		[
-			Noyt_1,											// Object the action is attached to
-			format ["<t size='2.0'><t color='#2e85ff'>%1</t></t>",((West_side select _forEachIndex) select 1)],										// Title of the action
-			((West_side select _forEachIndex) select 2),	// Idle icon shown on screen
-			((West_side select _forEachIndex) select 2),	// Progress icon shown on screen
-			"_this distance _target < 3",						// Condition for the action to be shown
-			"_caller distance _target < 3",						// Condition for the action to progress
-			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-			{},													// Code executed on every progress tick
-			{ 
-				player_faction = (West_side select((_this select 3)select 0));player_side = WEST; publicVariable "player_side"; publicVariable "player_faction"; 	removeAllActions Noyt_1;
-			},				// Code executed on completion
-			{},													// Code executed on interrupted
-			[_forEachIndex],									// Arguments passed to the scripts as _this select 3
-			1,													// Action duration in seconds
-			0,													// Priority
-			false,												// Remove on completion
-			false												// Show in unconscious state
-		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+		} forEach West_side;
 
-	} forEach West_side;
+		sleep 0.1;
 
-	sleep 0.1;
+		{
 
-	{
+			[
+				Noyt_1,											// Object the action is attached to
+				format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>",((East_side select _forEachIndex) select 1)],										// Title of the action
+				((East_side select _forEachIndex) select 2),	// Idle icon shown on screen
+				((East_side select _forEachIndex) select 2),	// Progress icon shown on screen
+				"_this distance _target < 3",						// Condition for the action to be shown
+				"_caller distance _target < 3",						// Condition for the action to progress
+				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+				{},													// Code executed on every progress tick
+				{ 
+					player_faction = (East_side select((_this select 3)select 0));
+					player_side = East;
+					publicVariable "player_side";
+					publicVariable "player_faction";
+					removeAllActions Noyt_1;
+					profileNamespace setVariable ["player_side", player_side];
+					profileNamespace setVariable ["player_side", player_faction];
+				},				// Code executed on completion
+				{},													// Code executed on interrupted
+				[_forEachIndex],									// Arguments passed to the scripts as _this select 3
+				1,													// Action duration in seconds
+				0,													// Priority
+				false,												// Remove on completion
+				false												// Show in unconscious state
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
-		[
-			Noyt_1,											// Object the action is attached to
-			format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>",((East_side select _forEachIndex) select 1)],										// Title of the action
-			((East_side select _forEachIndex) select 2),	// Idle icon shown on screen
-			((East_side select _forEachIndex) select 2),	// Progress icon shown on screen
-			"_this distance _target < 3",						// Condition for the action to be shown
-			"_caller distance _target < 3",						// Condition for the action to progress
-			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-			{},													// Code executed on every progress tick
-			{ 
-				player_faction = (East_side select((_this select 3)select 0));player_side = East; publicVariable "player_side"; publicVariable "player_faction"; 	removeAllActions Noyt_1;
-			},				// Code executed on completion
-			{},													// Code executed on interrupted
-			[_forEachIndex],									// Arguments passed to the scripts as _this select 3
-			1,													// Action duration in seconds
-			0,													// Priority
-			false,												// Remove on completion
-			false												// Show in unconscious state
-		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+		} forEach East_side;
 
-	} forEach East_side;
+		sleep 0.1;
 
-	sleep 0.1;
+		{
 
-	{
+			[
+				Noyt_1,											// Object the action is attached to
+				format ["<t size='2.0'><t color='#57ff24'>%1</t></t>",((Independent_side select _forEachIndex) select 1)],										// Title of the action
+				((Independent_side select _forEachIndex) select 2),	// Idle icon shown on screen
+				((Independent_side select _forEachIndex) select 2),	// Progress icon shown on screen
+				"_this distance _target < 3",						// Condition for the action to be shown
+				"_caller distance _target < 3",						// Condition for the action to progress
+				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+				{},													// Code executed on every progress tick
+				{ 
+					player_faction = (Independent_side select((_this select 3)select 0));
+					player_side = independent;
+					publicVariable "player_side";
+					publicVariable "player_faction";
+					removeAllActions Noyt_1;
+					profileNamespace setVariable ["player_side", player_side];
+					profileNamespace setVariable ["player_faction", player_faction];
+				},				// Code executed on completion
+				{},													// Code executed on interrupted
+				[_forEachIndex],									// Arguments passed to the scripts as _this select 3
+				1,													// Action duration in seconds
+				0,													// Priority
+				false,												// Remove on completion
+				false												// Show in unconscious state
+			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
-		[
-			Noyt_1,											// Object the action is attached to
-			format ["<t size='2.0'><t color='#57ff24'>%1</t></t>",((Independent_side select _forEachIndex) select 1)],										// Title of the action
-			((Independent_side select _forEachIndex) select 2),	// Idle icon shown on screen
-			((Independent_side select _forEachIndex) select 2),	// Progress icon shown on screen
-			"_this distance _target < 3",						// Condition for the action to be shown
-			"_caller distance _target < 3",						// Condition for the action to progress
-			{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-			{},													// Code executed on every progress tick
-			{ 
-				player_faction = (Independent_side select((_this select 3)select 0));player_side = independent; publicVariable "player_side"; publicVariable "player_faction"; 	removeAllActions Noyt_1;
-			},				// Code executed on completion
-			{},													// Code executed on interrupted
-			[_forEachIndex],									// Arguments passed to the scripts as _this select 3
-			1,													// Action duration in seconds
-			0,													// Priority
-			false,												// Remove on completion
-			false												// Show in unconscious state
-		] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-	} forEach Independent_side;
+		} forEach Independent_side;
 
 
-	[]spawn{
+		[]spawn{
+			waitUntil{
+			"Администратор, Выберите фракцию за которую будете играть"remoteExec ["hint", 0];
+			sleep 20;
+			!isNil{player_faction}
+			};
+		};
 		waitUntil{
-		"Администратор, Выберите фракцию за которую будете играть"remoteExec ["hint", 0];
-		sleep 20;
-		!isNil{player_faction}
+			!isNil{player_faction}
+		};
+
+	}else{
+		if(isNil{profileNamespace getVariable "player_faction"})then{
+			player_side = WEST;
+			player_faction = West_side select 0; 
+		}else{
+			player_side = profileNamespace getVariable "player_side";
+			player_faction = profileNamespace getVariable "player_faction";
 		};
 	};
-	waitUntil{
-		!isNil{player_faction}
-	};
-
 	// add flag player faction
 	Baner_1 setObjectTextureGlobal [0, player_faction select 2];
 	Flag_1 setFlagTexture (player_faction select 2);
@@ -430,102 +461,129 @@ list_roads_all_map = center_map nearRoads radius_map;
 	// add action
 
 waitUntil{
-	if!(player_side isEqualTo west)then{
-		{
+	if(paramsArray select 11 == 2)then{
+		if!(player_side isEqualTo west)then{
+			{
 
-			[
-				Noyt_1,											// Object the action is attached to
-				format ["<t size='2.0'><t color='#2e85ff'>%1</t></t>",((West_side select _forEachIndex) select 1)],										// Title of the action
-				((West_side select _forEachIndex) select 2),	// Idle icon shown on screen
-				((West_side select _forEachIndex) select 2),	// Progress icon shown on screen
-				"_this distance _target < 3",						// Condition for the action to be shown
-				"_caller distance _target < 3",						// Condition for the action to progress
-				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-				{},													// Code executed on every progress tick
-				{ 
-					enemy_fraction = (West_side select((_this select 3)select 0));enemy_side = WEST; publicVariable "enemy_side"; publicVariable "enemy_fraction"; 	removeAllActions Noyt_1;
-				},				// Code executed on completion
-				{},													// Code executed on interrupted
-				[_forEachIndex],									// Arguments passed to the scripts as _this select 3
-				1,													// Action duration in seconds
-				0,													// Priority
-				false,												// Remove on completion
-				false												// Show in unconscious state
-			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+				[
+					Noyt_1,											// Object the action is attached to
+					format ["<t size='2.0'><t color='#2e85ff'>%1</t></t>",((West_side select _forEachIndex) select 1)],										// Title of the action
+					((West_side select _forEachIndex) select 2),	// Idle icon shown on screen
+					((West_side select _forEachIndex) select 2),	// Progress icon shown on screen
+					"_this distance _target < 3",						// Condition for the action to be shown
+					"_caller distance _target < 3",						// Condition for the action to progress
+					{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+					{},													// Code executed on every progress tick
+					{ 
+						enemy_fraction = (West_side select((_this select 3)select 0));
+						enemy_side = WEST;
+						publicVariable "enemy_side";
+						publicVariable "enemy_fraction";
+						removeAllActions Noyt_1;
+						profileNamespace setVariable ["enemy_fraction", enemy_fraction];
+						profileNamespace setVariable ["enemy_side", enemy_side];
+					},				// Code executed on completion
+					{},													// Code executed on interrupted
+					[_forEachIndex],									// Arguments passed to the scripts as _this select 3
+					1,													// Action duration in seconds
+					0,													// Priority
+					false,												// Remove on completion
+					false												// Show in unconscious state
+				] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
-		} forEach West_side;
-	};
+			} forEach West_side;
+		};
 
-	sleep 0.1;
+		sleep 0.1;
 
-	if!(player_side isEqualTo EAST)then{
-		{
+		if!(player_side isEqualTo EAST)then{
+			{
 
-			[
-				Noyt_1,											// Object the action is attached to
-				format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>",((East_side select _forEachIndex) select 1)],										// Title of the action
-				((East_side select _forEachIndex) select 2),	// Idle icon shown on screen
-				((East_side select _forEachIndex) select 2),	// Progress icon shown on screen
-				"_this distance _target < 3",						// Condition for the action to be shown
-				"_caller distance _target < 3",						// Condition for the action to progress
-				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-				{},													// Code executed on every progress tick
-				{ 
-					enemy_fraction = (East_side select((_this select 3)select 0));enemy_side = EAST; publicVariable "enemy_side"; publicVariable "enemy_fraction"; 	removeAllActions Noyt_1;
-				},				// Code executed on completion
-				{},													// Code executed on interrupted
-				[_forEachIndex],									// Arguments passed to the scripts as _this select 3
-				1,													// Action duration in seconds
-				0,													// Priority
-				false,												// Remove on completion
-				false												// Show in unconscious state
-			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+				[
+					Noyt_1,											// Object the action is attached to
+					format ["<t size='2.0'><t color='#ff0d00'>%1</t></t>",((East_side select _forEachIndex) select 1)],										// Title of the action
+					((East_side select _forEachIndex) select 2),	// Idle icon shown on screen
+					((East_side select _forEachIndex) select 2),	// Progress icon shown on screen
+					"_this distance _target < 3",						// Condition for the action to be shown
+					"_caller distance _target < 3",						// Condition for the action to progress
+					{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+					{},													// Code executed on every progress tick
+					{ 
+						enemy_fraction = (East_side select((_this select 3)select 0));
+						enemy_side = EAST;
+						publicVariable "enemy_side";
+						publicVariable "enemy_fraction";
+						removeAllActions Noyt_1;
+						profileNamespace setVariable ["enemy_fraction", enemy_fraction];
+						profileNamespace setVariable ["enemy_side", enemy_side];
+					},				// Code executed on completion
+					{},													// Code executed on interrupted
+					[_forEachIndex],									// Arguments passed to the scripts as _this select 3
+					1,													// Action duration in seconds
+					0,													// Priority
+					false,												// Remove on completion
+					false												// Show in unconscious state
+				] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
-		} forEach East_side;
-	};
+			} forEach East_side;
+		};
 
-	if!(player_side isEqualTo independent)then{
-		{
+		if!(player_side isEqualTo independent)then{
+			{
 
-			[
-				Noyt_1,											// Object the action is attached to
-				format ["<t size='2.0'><t color='#57ff24'>%1</t></t>",((Independent_side select _forEachIndex) select 1)],										// Title of the action
-				((Independent_side select _forEachIndex) select 2),	// Idle icon shown on screen
-				((Independent_side select _forEachIndex) select 2),	// Progress icon shown on screen
-				"_this distance _target < 3",						// Condition for the action to be shown
-				"_caller distance _target < 3",						// Condition for the action to progress
-				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-				{},													// Code executed on every progress tick
-				{ 
-					enemy_fraction = (Independent_side select((_this select 3)select 0));enemy_side = independent; publicVariable "enemy_side"; publicVariable "enemy_fraction"; removeAllActions Noyt_1;
-				},				// Code executed on completion
-				{},													// Code executed on interrupted
-				[_forEachIndex],									// Arguments passed to the scripts as _this select 3
-				1,													// Action duration in seconds
-				0,													// Priority
-				false,												// Remove on completion
-				false												// Show in unconscious state
-			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
+				[
+					Noyt_1,											// Object the action is attached to
+					format ["<t size='2.0'><t color='#57ff24'>%1</t></t>",((Independent_side select _forEachIndex) select 1)],										// Title of the action
+					((Independent_side select _forEachIndex) select 2),	// Idle icon shown on screen
+					((Independent_side select _forEachIndex) select 2),	// Progress icon shown on screen
+					"_this distance _target < 3",						// Condition for the action to be shown
+					"_caller distance _target < 3",						// Condition for the action to progress
+					{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+					{},													// Code executed on every progress tick
+					{ 
+						enemy_fraction = (Independent_side select((_this select 3)select 0));
+						enemy_side = independent;
+						publicVariable "enemy_side";
+						publicVariable "enemy_fraction";
+						removeAllActions Noyt_1;
+						profileNamespace setVariable ["enemy_fraction", enemy_fraction];
+						profileNamespace setVariable ["enemy_side", enemy_side];
+					},				// Code executed on completion
+					{},													// Code executed on interrupted
+					[_forEachIndex],									// Arguments passed to the scripts as _this select 3
+					1,													// Action duration in seconds
+					0,													// Priority
+					false,												// Remove on completion
+					false												// Show in unconscious state
+				] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
-		} forEach Independent_side;
-	};
+			} forEach Independent_side;
+		};
 
 
-	[]spawn{
+		[]spawn{
+			waitUntil{
+			"Администратор, Выберите фракцию противника"remoteExec ["hint", 0];
+			sleep 20;
+			!isNil{enemy_fraction}
+			};
+		};
 		waitUntil{
-		"Администратор, Выберите фракцию противника"remoteExec ["hint", 0];
-		sleep 20;
-		!isNil{enemy_fraction}
+			!isNil{enemy_fraction}
+		};
+		hint"";
+	}else{
+		if(isNil{profileNamespace getVariable "enemy_fraction"})then{
+			enemy_side = East;
+			enemy_fraction = East_side select 0; 
+		}else{
+			enemy_side = profileNamespace getVariable "enemy_side";
+			enemy_fraction = profileNamespace getVariable "enemy_fraction";
 		};
 	};
-	waitUntil{
-		!isNil{enemy_fraction}
-	};
-	hint"";
+	////////////////////////////// -------------------------- add enemy class names --------------------------------/////////////////////////////////////////////////
 
-////////////////////////////// -------------------------- add enemy class names --------------------------------/////////////////////////////////////////////////
-
-//-----------------------------------inf 
+	//-----------------------------------inf 
 
 	_inf_enemy_missions_arry_not_redy = "(getText (_x >> 'faction') == enemy_fraction select 0) and (configName _x isKindOf ""Man"")" configClasses (configFile >> "CfgVehicles"); 
 
@@ -566,7 +624,7 @@ waitUntil{
 		car_enemy_mission_arry append [str objNull];
 	};
 
-/////////// back up if no car in select enemy faction
+	/////////// back up if no car in select enemy faction
 	if!((car_enemy_mission_arry select 0) isNotEqualto "<NULL-object>")then{
 		hint "Вы выбрали фракцию противника у кторой нету базовой техники, выбирите другую фракцию!";
 		enemy_fraction = nil;
@@ -672,46 +730,58 @@ waitUntil{
 
 	// add action
 
+	if(paramsArray select 11 == 2)then{
+		if(serverCommandAvailable '#kick' or !isMultiplayer)then{
+			{
 
-	if(serverCommandAvailable '#kick' or !isMultiplayer)then{
-		{
+				[
+					Noyt_1,											// Object the action is attached to
+					format ["<t size='2.0'><t color='#8f05ff'>%1</t></t>",((Civilian_side select _forEachIndex) select 1)],										// Title of the action
+					((Civilian_side select _forEachIndex) select 2),	// Idle icon shown on screen
+					((Civilian_side select _forEachIndex) select 2),	// Progress icon shown on screen
+					"_this distance _target < 3",						// Condition for the action to be shown
+					"_caller distance _target < 3",						// Condition for the action to progress
+					{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
+					{},													// Code executed on every progress tick
+					{ 
+						Civilian_faction = (Civilian_side select((_this select 3)select 0));
+						publicVariable "Civilian_faction";
+						removeAllActions Noyt_1;
+						profileNamespace setVariable ["Civilian_faction", Civilian_faction];
+						profileNamespace setVariable ["Civilian_side", Civilian_side];
+					},				// Code executed on completion
+					{},													// Code executed on interrupted
+					[_forEachIndex],									// Arguments passed to the scripts as _this select 3
+					1,													// Action duration in seconds
+					0,													// Priority
+					false,												// Remove on completion
+					false												// Show in unconscious state
+				] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
 
-			[
-				Noyt_1,											// Object the action is attached to
-				format ["<t size='2.0'><t color='#8f05ff'>%1</t></t>",((Civilian_side select _forEachIndex) select 1)],										// Title of the action
-				((Civilian_side select _forEachIndex) select 2),	// Idle icon shown on screen
-				((Civilian_side select _forEachIndex) select 2),	// Progress icon shown on screen
-				"_this distance _target < 3",						// Condition for the action to be shown
-				"_caller distance _target < 3",						// Condition for the action to progress
-				{hint "Продолжайте удерживать клавишу для выбора"},													// Code executed when action starts
-				{},													// Code executed on every progress tick
-				{ 
-					Civilian_faction = (Civilian_side select((_this select 3)select 0)); publicVariable "Civilian_faction"; removeAllActions Noyt_1;
-				},				// Code executed on completion
-				{},													// Code executed on interrupted
-				[_forEachIndex],									// Arguments passed to the scripts as _this select 3
-				1,													// Action duration in seconds
-				0,													// Priority
-				false,												// Remove on completion
-				false												// Show in unconscious state
-			] remoteExec ["BIS_fnc_holdActionAdd", select_client_admin];	// MP compatible implementation
-
-		} forEach Civilian_side;
-	};
-
-	[]spawn{
-		waitUntil{
-		"Администратор, Выберите фракцию гражданских"remoteExec ["hint", 0];
-		sleep 20;
-		!isNil{Civilian_faction}
+			} forEach Civilian_side;
 		};
-	};
-	waitUntil{
-		!isNil{Civilian_faction}
-	};
-	removeAllActions Noyt_1;
 
-	hint"";
+		[]spawn{
+			waitUntil{
+			"Администратор, Выберите фракцию гражданских"remoteExec ["hint", 0];
+			sleep 20;
+			!isNil{Civilian_faction}
+			};
+		};
+		waitUntil{
+			!isNil{Civilian_faction}
+		};
+		removeAllActions Noyt_1;
+
+		hint"";
+}else{
+	if(isNil{profileNamespace getVariable "Civilian_faction"})then{
+			Civilian_faction = Civilian_side select 2; 
+	}else{
+		Civilian_faction = profileNamespace getVariable "Civilian_faction";
+	};
+};
+	
 
 ////////////////////////////// -------------------------- add civilian class names --------------------------------/////////////////////////////////////////////////
 
