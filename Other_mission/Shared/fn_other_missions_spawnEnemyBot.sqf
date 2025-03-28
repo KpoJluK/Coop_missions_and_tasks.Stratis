@@ -85,8 +85,6 @@
 
 ///////// ВСЕ ЧТО НИЖЕ НЕ ТРОГАТЬ ЭТО САМ СКРИПТ!! Не меняйте ничего ниже если вы не понимаете ничего в этом!////////////////////////
 
-																		// принимаю парметры
-
 params [
 	["_pos_spawn", getPos player],
 	["_side_bot", WEST],
@@ -206,6 +204,8 @@ while {_count_patrul_bot_grup > 0} do
 		{
 			_unit = _group createUnit [selectRandom _arry_class_name_bot, _pos_spawn, [], 0, "FORM"];
 
+			[_unit] joinSilent _group;
+			
 			sleep 0.5;
 
 			_arry_group_bot pushBack _unit; // добавляю юнит в массив что бы потом все вместе удалить
@@ -376,6 +376,7 @@ if(_spawn_bot_in_roof)then{
 			then {
 			_last_pos_bilding = count _select_bilding_from_bot; // подсчет количество позицый в выбраном здании
 			_unit = _group_bot_in_bilding createUnit [selectRandom _arry_class_name_bot, _select_bilding_from_bot select _last_pos_bilding - 1, [], 0, "FORM"]; //спаун бота
+			[_unit] joinSilent _group_bot_in_bilding;
 			_unit disableAI "PATH";// отключить боту перемещение
 			_arry_group_bot pushBack _unit; 
 				};
@@ -413,6 +414,7 @@ if(_spawn_bot_in_bilding)then{
 	if(random 100 <= _chanse_spawn_in_bilding)then 
 	{ 
 				_unit = _group_defend createUnit [selectRandom _arry_class_name_bot, ([_x] call BIS_fnc_buildingPositions) select _i, [], 0, "FORM"]; 
+				[_unit] joinSilent _group_defend;
 				_unit disableAi "path"; 
 				_unit setPos (([_x] call BIS_fnc_buildingPositions) select _i); 
 				_arry_group_bot pushBack _unit;
